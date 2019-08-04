@@ -6,7 +6,7 @@ var hits = 0;
 var guesses = 0;
 var isSunk = false;
 while (isSunk == false) {
-    guess = prompt("Gotów, cel, pal! (podaj liczbę z zakresu od 0-6):");
+    guess = prompt("Gotów? cel, pal! (podaj liczbę z zakresu od 0-6):");
     if (guess < 0 || guess > 6) {
         alert("Proszę podać prawidłowy numer komórki!");
     } else {
@@ -23,6 +23,6 @@ while (isSunk == false) {
         }
     }
 }
-var stats = "Potrzebowałeś" + guesses + " prób, by zatopić okręt, " +
-    "czyli Twoja efektywność wynosi: " + (3 / guesses) ".";
+var stats = "Potrzebowałeś " + guesses + " prób, by zatopić okręt, " +
+    "czyli Twoja efektywność wynosi: " + (3 / guesses) + ".";
 alert(stats);
