@@ -38,3 +38,12 @@ form input {
     border-color: rgb(83, 175, 19);
     font-size: 10px;
 }
+
+.hit {
+    background: url('ship.png') no-repeat center center;
+}
+
+.miss {
+    background: url('miss.png') no-repeat center center;
+}
+
