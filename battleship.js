@@ -1,40 +1,4 @@
-// var loc1 = Math.floor(Math.random() * 5);
-// var loc1Guess = false;
-// var loc2 = loc1 + 1;
-// var loc2Guess = false;
-// var loc3 = loc2 + 1;
-// var loc3Guess = false;
-// var guess;
-// var hits = 0;
-// var guesses = 0;
-// var isSunk = false;
-// while (isSunk == false) {
-//     guess = prompt("Gotów? cel, pal! (podaj liczbę z zakresu od 0-6):");
-//     if (guess < 0 || guess > 6) {
-//         alert("Proszę podać prawidłowy numer komórki!");
-//     } else {
-//         guesses = guesses + 1;
-//         if (guess == loc1 || guess == loc2 || guess == loc3) {
-//             alert("Trafiony!");
-//             hits = hits + 1;
-//             if (hits == 3) {
-//                 isSunk = true;
-//                 alert("Zatopiłeś mój okręt!");
-//             }
-//         } else {
-//             alert("Pudło!");
-//         }
-//     }
-// }
-// var stats = "Potrzebowałeś " + guesses + " prób, by zatopić okręt, " +
-//     "czyli Twoja efektywność wynosi: " + (3 / guesses) + ".";
-// alert(stats);
-
-
-// NEW VERSION OF GAME
-
 var view = {
-
     displayMessage: function (msg) {
         var messageArea = document.getElementById('messageArea');
         messageArea.innerHTML = msg;
@@ -55,22 +19,20 @@ var model = {
     shipLength: 3,
     shipsSunk: 0,
     ships: [
-        { locations: ['06', '16', '26'], hits: ['', '', ''] },
-        { locations: ['24', '34', '44'], hits: ['', '', ''] },
-        { locations: ['10', '11', '12'], hits: ['', '', ''] },
+        { locations: ['0', '0', '0'], hits: ['', '', ''] },
+        { locations: ['0', '0', '0'], hits: ['', '', ''] },
+        { locations: ['0', '0', '0'], hits: ['', '', ''] },
     ],
     fire: function (guess) {
         for (var i = 0; i < this.numShips; i++) {
             var ship = this.ships[i];
             var index = ship.locations.indexOf(guess);
-            // var locations = ship.locations;
-            // var index = locations.indexOf(guess);
             if (index >= 0) {
                 ship.hits[index] = 'hit';
                 view.displayHit(guess);
                 view.displayMessage('Trafiony!');
                 if (this.isSunk(ship)) {
-                    view.displayMessage('Zatopiłeś okręt gnoju!');
+                    view.displayMessage('Zatopiłeś okręt!');
                     this.shipsSunk++;
                 }
                 return true;
@@ -87,13 +49,114 @@ var model = {
             }
             return true;
         }
+    },
+    generateShipLocations: function () {
+        var locations;
+        for (var i = 0; i < this.numShips; i++) {
+            do {
+                locations = this.generateShip();
+            } while (this.collision(locations));
+            this.ships[i].locations = locations;
+        }
+    },
+    generateShip: function () {
+        var direction = Math.floor(Math.random() * 2);
+
+        var row, col;
+
+        if (direction === 1) {
+            row = Math.floor(Math.random() * this.boardSize);
+            col = Math.floor(Math.random() * (this.boardSize - this.shipLength));
+        } else {
+            row = Math.floor(Math.random() * (this.boardSize - this.shipLength));
+            col = Math.floor(Math.random() * this.boardSize);
+        }
+
+        var newShipLocations = [];
+        for (var i = 0; i < this.shipLength; i++) {
+            if (direction === 1) {
+                newShipLocations.push(row + "" + (col + i));
+            } else {
+                newShipLocations.push((row + i) + "" + col);
+            }
+        }
+        return newShipLocations;
+    },
+    collision: function (locations) {
+        for (var i = 0; i < this.numShips; i++) {
+            var ship = model.ships[i];
+            for (var j = 0; j < locations.length; j++) {
+                if (ship.locations.indexOf(locations[j]) >= 0) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 };
 
-// view.displayMiss('00');
-// view.displayHit('01');
-// view.displayMessage('Co Ty kurwa chcesz od ziomka');
+var controller = {
+    guesses: 0,
+    processGuess: function (guess) {
 
-model.fire('15');
-model.fire('00');
-model.fire('44');
+        var location = parseGuess(guess);
+
+        if (location) {
+            this.guesses++;
+            var hit = model.fire(location);
+            if (hit && model.shipsSunk === model.numShips) {
+                view.displayMessage('Zatopiłeś wszystkie okręty, w ' + this.guesses + ' próbach.');
+            }
+        }
+    }
+};
+
+function parseGuess(guess) {
+
+    var alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
+
+    if (guess === null || guess.length !== 2) {
+        alert('Ups, proszę wpisać literę i cyfrę');
+    } else {
+        firstChar = guess.charAt(0);
+        var row = alphabet.indexOf(firstChar);
+        var column = guess.charAt(1);
+
+        if (isNaN(row) || isNaN(column)) {
+            alert('ups! to nie są współrzędne');
+        } else if (row < 0 || row >= model.boardSize || column < 0 || column >= model.boardSize) {
+            alert('ups pole poza planszą!');
+        } else {
+            return row + column;
+        }
+    }
+    return null;
+}
+
+function handleKeyPress(e) {
+    var fireButton = document.getElementById('fireButton');
+    if (e.keyCode === 13) {
+        fireButton.click();
+        return false;
+    }
+}
+
+function handleFireButton() {
+    var guessInput = document.getElementById('guessInput');
+    var guess = guessInput.value;
+
+    controller.processGuess(guess);
+
+    guessInput.value = '';
+}
+
+function init() {
+    var fireButton = document.getElementById('fireButton');
+    fireButton.onclick = handleFireButton;
+    var guessInput = document.getElementById('guessInput');
+    guessInput.onkeypress = handleKeyPress;
+
+    model.generateShipLocations();
+}
+
+window.onload = init;
