@@ -14,34 +14,36 @@
     <div class="container">
         <header class="header">
             <h1 class="logo">BATTLESHIP</h1>
-            
-            <div class="stats-panel">
-                <div class="stat-card">
-                    <div class="stat-title">ODDANE STRZAŁY</div>
-                    <div class="stat-value" id="stats-shots">0</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-title">ZATOPIONE STATKI</div>
-                    <div class="stat-value" id="stats-sunk">0 / 3</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-title">SKUTECZNOŚĆ</div>
-                    <div class="stat-value" id="stats-accuracy">0%</div>
-                </div>
-            </div>
         </header>
 
         <main class="game-area">
-            <div class="board-wrapper">
-                <div class="grid-labels col-labels">
-                    <div>0</div><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div>
+            <div class="game-core">
+                <div class="board-wrapper">
+                    <div class="grid-labels col-labels">
+                        <div>0</div><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div>
+                    </div>
+                    <div class="grid-labels row-labels">
+                        <div>A</div><div>B</div><div>C</div><div>D</div><div>E</div><div>F</div><div>G</div>
+                    </div>
+                    
+                    <div id="board" class="board">
+                        <!-- Komórki wygenerowane przez JavaScript -->
+                    </div>
                 </div>
-                <div class="grid-labels row-labels">
-                    <div>A</div><div>B</div><div>C</div><div>D</div><div>E</div><div>F</div><div>G</div>
-                </div>
-                
-                <div id="board" class="board">
-                    <!-- Komórki wygenerowane przez JavaScript -->
+
+                <div class="stats-panel vertical-stats">
+                    <div class="stat-card">
+                        <div class="stat-title">ODDANE STRZAŁY</div>
+                        <div class="stat-value" id="stats-shots">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title">ZATOPIONE STATKI</div>
+                        <div class="stat-value" id="stats-sunk">0 / 3</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title">SKUTECZNOŚĆ</div>
+                        <div class="stat-value" id="stats-accuracy">0%</div>
+                    </div>
                 </div>
             </div>
             
