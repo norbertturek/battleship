@@ -189,6 +189,17 @@ const controller = {
     if (model.shipsSunk === model.numShips) {
       this.isGameOver = true;
       view.displayMessage(`Zwycięstwo w ${this.guesses} strzałach!`, false, true);
+      
+      // Pokazanie panelu końcowego
+      const accuracy = Math.round((model.shipsSunk * model.shipLength * 100) / this.guesses);
+      document.getElementById('modal-stats-text').innerHTML = `
+        Okręty wroga zniszczone.<br>
+        Użyte pociski: <strong>${this.guesses}</strong><br>
+        Skuteczność: <strong>${accuracy}%</strong>
+      `;
+      setTimeout(() => {
+          document.getElementById('victory-modal').classList.add('show');
+      }, 500); // 0.5s opóźnienia, żeby uzytkownik mogl zobaczyc ostatnie zatopienie
     }
     
     view.updateStats();
@@ -292,6 +303,12 @@ function init() {
 
   const guessInput = document.getElementById('guessInput');
   if (guessInput) guessInput.addEventListener('keydown', handleKeyPress);
+  
+  const restartBtn = document.getElementById('restart-btn');
+  if (restartBtn) restartBtn.addEventListener('click', () => {
+      // Dla najczystszego doświadczenia po prostu odświeżamy aplikację SPA
+      window.location.reload();
+  });
 
   model.generateShipLocations();
   view.updateStats();
