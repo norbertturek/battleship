@@ -138,12 +138,19 @@ body::before {
 
 @media (min-width: 768px) {
     .game-core {
-        flex-direction: row;
-        justify-content: center;
-        align-items: center; /* zamiast flex-start chcemy wyśrodkować bloki */
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        align-items: center;
+    }
+    .board-wrapper {
+        grid-column: 2; /* Środek (auto) */
     }
     .vertical-stats {
-        flex-direction: column; /* Utrzymuje kolumnę z boku na szerszych ekranach */
+        grid-column: 3; /* Prawe skrzydło (1fr) */
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center; /* Lub flex-start jeśli wolisz od lewej, ale wycentrujemy żeby karty ładnie schodziły z planszą */
     }
 }
 
