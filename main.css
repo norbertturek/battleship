@@ -1,49 +1,388 @@
+:root {
+    --bg-base: #020c02; /* Bardzo ciemny zielony/czarny */
+    --bg-panel: rgba(10, 30, 15, 0.8);
+    --border-color: rgba(74, 222, 128, 0.3);
+    --primary: #4ade80; /* Radarowy zielony (dominujący) */
+    --primary-glow: rgba(74, 222, 128, 0.5);
+    --hit-color: #ef4444; /* Czerwony - zarezerwowany na zatopienia, ale dominacja to nadal zieleń */
+    --hit-glow: rgba(239, 68, 68, 0.7);
+    --miss-color: #94a3b8;
+    --miss-glow: rgba(148, 163, 184, 0.4);
+    --text-main: #f0fdf4;
+    --text-muted: #86efac;
+    --success: #22c55e;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
 body {
-    background-color: black;
-}
-
-#board {
+    background-color: var(--bg-base);
+    color: var(--text-main);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     position: relative;
-    width: 1024px;
-    height: 863px;
-    margin: auto;
-    background: url("board.jpg") no-repeat;
+    overflow-x: hidden;
 }
 
-#messageArea {
+/* Subtelny radarowy gradient na całym tle */
+body::before {
+    content: '';
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: 200vw;
+    height: 200vw;
+    transform: translate(-50%, -50%);
+    background: 
+        radial-gradient(circle, rgba(74, 222, 128, 0.05) 5%, transparent 6%) 0 0/ 60px 60px,
+        radial-gradient(circle, rgba(74, 222, 128, 0.02) 20%, transparent 40%);
+    pointer-events: none;
+    z-index: -1;
+}
+
+.container {
+    width: 100%;
+    max-width: 900px;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    z-index: 1;
+}
+
+/* Header & Stats */
+.header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.logo {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    font-size: 2.5rem;
+    color: var(--primary);
+    text-shadow: 0 0 15px var(--primary-glow);
+    letter-spacing: 2px;
+    margin: 0;
+}
+
+.version {
+    font-size: 1rem;
+    color: var(--text-muted);
+    font-weight: 500;
+    text-shadow: none;
+    vertical-align: top;
+}
+
+.stats-panel {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.stat-card {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 0.75rem 1.25rem;
+    min-width: 120px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+    text-align: center;
+    transition: transform 0.2s;
+}
+
+.stat-title {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    color: var(--primary);
+    letter-spacing: 1px;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.stat-value {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+/* Game Area */
+.game-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+    width: 100%;
+}
+
+/* Board */
+.board-wrapper {
+    position: relative;
+    padding: 2rem;
+    background: rgba(2, 20, 5, 0.8);
+    border-radius: 12px;
+    box-shadow: 0 0 30px rgba(74, 222, 128, 0.1);
+    border: 1px solid rgba(74, 222, 128, 0.2);
+    /* Wymuszamy pełne zagospodarowanie środka */
+    margin: 0 auto;
+}
+
+.grid-labels {
     position: absolute;
-    top: 0;
-    left: 0;
-    color: rgb(83, 175, 19);
+    display: grid;
+    font-family: 'Orbitron', sans-serif;
+    color: var(--primary);
+    font-size: 0.85rem;
+    pointer-events: none;
+    opacity: 0.7;
 }
-table {
+
+.col-labels {
+    top: 0.5rem;
+    left: 2rem;
+    width: calc(100% - 2rem);
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+}
+
+.row-labels {
+    top: 2rem;
+    left: 0.5rem;
+    height: calc(100% - 2rem);
+    grid-template-rows: repeat(7, 1fr);
+    align-items: center;
+    text-align: center;
+}
+
+.board {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    grid-template-rows: repeat(7, 1fr);
+    gap: 4px;
+    width: 80vw;
+    height: 80vw;
+    max-width: 500px;
+    max-height: 500px;
+    background-image: 
+        linear-gradient(rgba(74, 222, 128, 0.15) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(74, 222, 128, 0.15) 1px, transparent 1px);
+    background-size: calc(100% / 7) calc(100% / 7);
+}
+
+.cell {
+    background-color: rgba(10, 30, 15, 0.6);
+    border: 1px solid rgba(74, 222, 128, 0.2);
+    border-radius: 4px;
+    cursor: crosshair;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.cell::before {
+    content: '';
     position: absolute;
-    left: 173px;
-    top: 98px;
-    border-spacing: 0;
-}
-td {
-    width: 94px;
-    height: 94px;
-}
-form {
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    padding: 15px;
-    background-color: rgb(83, 175, 19);
-}
-form input {
-    background-color: rgb(152, 207, 113);
-    border-color: rgb(83, 175, 19);
-    font-size: 10px;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: var(--primary);
+    opacity: 0;
+    transition: opacity 0.2s ease;
 }
 
-.hit {
-    background: url('ship.png') no-repeat center center;
+.cell:hover {
+    border-color: var(--primary);
+    box-shadow: inset 0 0 15px rgba(74, 222, 128, 0.3);
 }
 
-.miss {
-    background: url('miss.png') no-repeat center center;
+.cell:hover::before {
+    opacity: 0.1;
 }
 
+/* Hit & Miss */
+.cell.hit {
+    /* Używamy starego obrazka statku, centrowany */
+    background: rgba(239, 68, 68, 0.15) url('ship.png') center/contain no-repeat;
+    border-color: var(--hit-color);
+    box-shadow: inset 0 0 15px var(--hit-glow);
+    animation: shockwave 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    pointer-events: none;
+}
+
+.cell.miss {
+    /* Używamy obrazka pudła lub po prostu zostawiamy css z kropką jako backup, ale user preferował obrazki */
+    background: rgba(148, 163, 184, 0.1) url('miss.png') center/contain no-repeat;
+    border-color: rgba(148, 163, 184, 0.3);
+    pointer-events: none;
+    animation: fadeMiss 0.3s ease-out;
+}
+
+/* Animacje */
+@keyframes fadeMiss {
+    from { opacity: 0; transform: scale(0.8); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes shockwave {
+    0% { transform: scale(1); }
+    50% { transform: scale(0.9); }
+    100% { transform: scale(1); }
+}
+
+/* Tooltipy do powiadomień */
+.tooltip {
+    position: fixed;
+    transform: translate(-50%, -100%);
+    background: rgba(10, 30, 15, 0.95);
+    border: 1px solid var(--primary);
+    color: var(--primary);
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-family: 'Orbitron', monospace;
+    font-size: 0.85rem;
+    pointer-events: none; /* Żeby nie zapobiegać klikaniu pod spodem, jak myszka na to najedzie */
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5), 0 0 15px var(--primary-glow);
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    margin-top: -15px; /* Odstęp od myszki */
+}
+
+.tooltip.show {
+    animation: tooltipFloat 1.5s ease-out forwards;
+}
+
+.tooltip.error {
+    border-color: var(--hit-color);
+    color: var(--hit-color);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5), 0 0 15px var(--hit-glow);
+}
+
+@keyframes tooltipFloat {
+    0% { opacity: 0; transform: translate(-50%, -50%); }
+    20% { opacity: 1; transform: translate(-50%, -100%); }
+    80% { opacity: 1; transform: translate(-50%, -100%); }
+    100% { opacity: 0; transform: translate(-50%, -150%); }
+}
+
+/* Controls & Terminal (Wyśrodkowane na dole) */
+.controls-container {
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.terminal {
+    background: rgba(2, 10, 5, 0.9);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.5);
+}
+
+.terminal-header {
+    background: #061f0e;
+    padding: 0.5rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+.dot.red { background-color: #ff5f56; }
+.dot.yellow { background-color: #ffbd2e; }
+.dot.green { background-color: #27c93f; }
+
+.terminal-title {
+    margin-left: auto;
+    font-family: 'Orbitron', sans-serif;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+}
+
+.terminal-body {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.retro-form {
+    width: 100%;
+}
+
+.retro-form label {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+    text-align: center;
+}
+
+.input-group {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+}
+
+#guessInput {
+    flex: 1;
+    max-width: 250px;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--border-color);
+    padding: 0.75rem 1rem;
+    color: var(--primary);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1rem;
+    border-radius: 4px;
+    text-transform: uppercase;
+    transition: all 0.2s;
+    text-align: center;
+}
+
+#guessInput:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 15px var(--primary-glow);
+}
+
+#fireButton {
+    background: rgba(74, 222, 128, 0.1);
+    color: var(--primary);
+    border: 1px solid var(--primary);
+    padding: 0 1.5rem;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+#fireButton:hover {
+    background: var(--primary);
+    color: var(--bg-base);
+    box-shadow: 0 0 20px var(--primary-glow);
+}
+
+#fireButton:active {
+    transform: scale(0.95);
+}
